@@ -9,34 +9,29 @@ from dotenv import load_dotenv
 from Models.user import User
 from .database import add_user_data, get_user
 from Services import database
-import jwt
+from .auth import Auth
+from fastapi import Depends
+from fastapi.security import HTTPBearer
 
+security = HTTPBearer()
 load_dotenv(Path(__file__).resolve().parent.parent / '.env')
 
 #65eddc2848ee5d537baaae50826639ad0151a6cd
 
 router = APIRouter()
+auth = Auth()
 
-#test-route only
-@router.get("/user-git-data")
-def get_user_github_data(code :str):
-    try:
-        url = "https://api.github.com/user"
-        params = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {code}"}
-
-        response = requests.get(url, headers=params)
-        
-    except Exception as err:
-        print(f"ERR> Error: {err}")
-        return
+#--Utility--#
+def get_cred(cred = Depends(security)):
+    token = cred.credentials
+    print("cred: ", token)
+    user_id = auth.verify(token)
+    return user_id
 
 @router.get("/user")
-async def get_user_data(jwt_token :str):
+async def get_user_data(user_id :str = Depends(get_cred)):
     try:
-        token = jwt.decode(jwt_token, os.getenv("JWT_SECRET"), algorithms="HS256")
-        user_id = token["token"]
-
-        return get_user(user_id)
+        return await get_user(user_id)
 
     except Exception as err:
         print(f"ERR> Error sending user data: {err}")
@@ -60,7 +55,7 @@ async def user_login(code :str):
         await add_user_data(user)
 
         #create JWT here
-        encoded = jwt.encode({"token": user.user_id}, os.getenv("JWT_SECRET"), algorithm="HS256")
+        encoded = auth.encode({"token": user.user_id})
         print("LOG>> User login success...")
         return {"message": "User logged in...", "jwt": encoded}
     except Exception as err:

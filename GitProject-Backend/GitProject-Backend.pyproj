@@ -28,6 +28,7 @@
     <Compile Include="Models\repo.py" />
     <Compile Include="Models\task.py" />
     <Compile Include="Models\user.py" />
+    <Compile Include="Services\auth.py" />
     <Compile Include="Services\database.py" />
     <Compile Include="Services\UserAPI.py" />
   </ItemGroup>

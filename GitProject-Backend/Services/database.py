@@ -11,7 +11,7 @@ collection = database["GitCollection"]
 
 async def get_user(user_id :int):
     try:
-        query_filter = collection.find_one({"user_id": user_id})
+        query_filter = await collection.find_one({"user_id": user_id})
         if not query_filter:
             print("ERR> User not found!!")
             return

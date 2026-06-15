@@ -27,7 +27,9 @@ function App() {
                 if (data["jwt"]) {
                     setLoginChecker("Login Successfull!");
                     localStorage.setItem("token", data["jwt"]);
-                    navigate("/dashboard");
+                    if (localStorage.getItem("token")) {
+                        navigate("/dashboard");
+                    }
                 } else {
                     setLoginChecker("Login Failed!");
                 }

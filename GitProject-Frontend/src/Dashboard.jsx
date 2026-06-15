@@ -6,7 +6,9 @@ function Dashboard() {
     const API_URL = 'http://localhost:4067'
 
     useEffect(() => {
-        fetch(`${API_URL}/user-api/user?jwt_token=${localStorage.getItem("token")}`).then(
+        const token = localStorage.getItem("token");
+
+        fetch(`${API_URL}/user-api/user`, { headers: {Authorization: `Bearer ${token}`} }).then(
             (response) => {
                 if (!response.ok) {
                     console.log("No response from get-user");
