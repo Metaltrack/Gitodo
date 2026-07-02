@@ -6,8 +6,6 @@ class Repo():
     repo_url :str
     repo_html_url :str
     repo_commit_url :str
-    repo_progress :int
-    task_list :Task = []
 
     def __init__(self, _id :int, name :str, url :str, html_url :str, commit_url :str):
         self.repo_id = _id
@@ -15,6 +13,8 @@ class Repo():
         self.repo_url = url
         self.repo_html_url = html_url
         self.repo_commit_url = commit_url
+        self.repo_progress :int
+        self.task_list :list[Task] = []
 
     def check_progress(self):
         total_complete :int = 0

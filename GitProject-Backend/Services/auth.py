@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import jwt
 from dotenv import load_dotenv
 import os
@@ -14,11 +15,11 @@ class Auth():
         return jwt.encode(token, self.secret, algorithm=self.algorithm)
 
     def decode(self, token :str):
-        return jwt.decode(token, self.secret, algorithms=self.algorithm)
+        return jwt.decode(token, self.secret, algorithms=[self.algorithm])
 
     def verify(self, token :str):
         try:
-            return self.decode(token)["token"]
-        except Exception as err:
+            return self.decode(token)["sub"]
+        except jwt.InvalidTokenError as err:
             print(f"ERR> Error verifying JWT: {err}")
-            return
+            raise HTTPException(status_code=401, detail="Invalid JWT")

@@ -8,6 +8,7 @@ class Task():
         self.task_id = _id
         self.task_name = name
         self.task_condition = condition
+        self.task_completion :bool
 
     def set_completion(self, state :bool):
         self.task_completion = state
