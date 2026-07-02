@@ -31,9 +31,13 @@
     <Compile Include="Services\auth.py" />
     <Compile Include="Services\database.py" />
     <Compile Include="Services\UserAPI.py" />
+    <Compile Include="Utility\logger.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
+    <Folder Include="Utility\" />
     <Folder Include="Services\" />
   </ItemGroup>
   <ItemGroup>

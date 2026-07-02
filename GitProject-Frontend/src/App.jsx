@@ -5,25 +5,27 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import userHandler from './scripts/user_handler'
 import Router from './Router'
+import { log, log_level } from './scripts/logger'
 
 function App() {
     const [loginChecker, setLoginChecker] = useState("");
     const navigate = useNavigate();
 
-  const API_URL = 'http://localhost:4067'
+    const API_URL = 'http://localhost:4067'
 
+//Send backend Code from Github to get Auth Code for data
     function handleLogin(code) {
         fetch(`${API_URL}/user-api/user-login?code=${code}`).then(
             (response) => {
                 if (!response.ok) {
-                    console.log("No response from user-login");
+                    log(log_level.ERROR, "App.jsx", `Response from API '${response.statusText}'`);
                     return null;
                 }
                 return response.json();
             }
         ).then(
             (data) => {
-                console.log(data);
+                log(log_level.INFO, "App.jsx", `Data from API '${data}'`);
                 if (data["jwt"]) {
                     setLoginChecker("Login Successfull!");
                     localStorage.setItem("token", data["jwt"]);
@@ -36,43 +38,46 @@ function App() {
             }
         ).catch(
             (error) => {
-                console.log("ERROR: " + error);
+                log(log_level.ERROR, "App.jsx", `handleLogin function '${error}'`);
             }
         )
     }
 
+//Call when Github redirects us back
     useEffect(() => {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
 
         const codeParam = urlParams.get("code");
         if (codeParam) {
-            console.log("Successfully got code from git hub...");
+            log(log_level.INFO, "App.jsx", `Successfully recieved code from Github for further authorization`);
+            //call to backend
             handleLogin(codeParam);
         } else {
-            console.log("Login Failed...");
+            log(log_level.WARNING, "App.jsx", `User not yet logged in through github`);
         }
     }, [])
 
+//Page Startup Function
     useEffect(() => {
         fetch(API_URL + '/').then(
             response => {
                 if (!response.ok) {
-                    console.log(`ERR> API FETCH FAILED ${response.status}`);
+                    log(log_level.ERROR, "App.jsx", `Response from API '${response.statusText}'`);
                     throw new Error(`ERR> API FETCH FAILED ${response.status}`);
                 } else {
-                    console.log(`LOG> API FETCH SUCCESS ${response.status}`)
+                    log(log_level.INFO, "App.jsx", `Response from API '${response.statusText}'`);
                 }
                 return response.json();
             }
         ).then(
             data => {
-                console.log(data);
+                log(log_level.INFO, "App.jsx", `Data from API '${data}'`)
                 return data["message"];
             }
         ).catch(
             error => {
-                console.log(`ERR> POST API FETCH ERROR ${error}`);
+                log(log_level.ERROR, "App.jsx", `useEffect promise '${error}'`);
             }
         )
     }, [])

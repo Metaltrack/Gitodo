@@ -1,13 +1,11 @@
-from logging import Logger
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from Services import UserAPI
 from Services.database import DataBase
+from Utility.logger import log, log_level
 
 app = FastAPI()
-logger = Logger("Gateway")
 allow_list = [
         "*"
     ]
@@ -28,17 +26,17 @@ async def init():
         db = DataBase()
         #check database
         if await db.client.address:
-            logger.info("Database Connected")
+            log(log_level.INFO, __file__, f"Database Response {await db.client.address}")
         else:
-            logger.error("Database Connection Failed, Retrying...")
+            log
             for tries in range(3):
                 db = DataBase()
                 if await db.client.address:
-                    logger.info("Database Connected")
+                    log(log_level.INFO, __file__, f"Database Response {await db.client.address}")
                     break
-                logger.error("Retrying")
+                log(log_level.ERROR, __file__, f"Database did not respond...")
             if tries >= 3:
-                logger.critical("Database Connection Failed!!")
+                log()
     except Exception as err:
         raise Exception(err)
 
