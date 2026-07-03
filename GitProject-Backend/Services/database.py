@@ -1,5 +1,4 @@
-from enum import unique
-
+from Utility.logger import log, log_level
 from pymongo import AsyncMongoClient
 from Models.models import user_model, repo_model, task_model
 from Models.user import User
@@ -39,7 +38,7 @@ class DataBase:
             result = await self.collection.find_one(query_filter)
         
             if(result):
-                print(f"LOG>> User with id {user.user_id} already exists... redirecting..")
+                log(log_level.INFO, __file__, f"User '{user.user_id}' already exists.. Updating user access token..")
                 update = await self.collection.update_one(query_filter, {"$set":{"access_token":user.access_token}})
                 return
 
@@ -67,11 +66,12 @@ class DataBase:
             )
 
             result = await self.collection.insert_one(input_user.model_dump())
-            print(f"LOG>> User added... {result}")
+            log(log_level.INFO, __file__, f"Database performed query with result '{result.acknowledged}', added user '{result.inserted_id}'")
 
-            await self.collection.create_index("user_id")
+            index = await self.collection.create_index("user_id")
+            log(log_level.INFO, __file__, f"Database performed query.. index created for user '{user.user_id}' -> '{index}'")
         except Exception as err:
-            print(f"ERR>> Error adding user to database: {err}")
+            log(log_level.ERROR, __file__, f"Database failed to add user, add_user_data function '{err}'")
 
     async def delete_user(self, user :User):
         try:

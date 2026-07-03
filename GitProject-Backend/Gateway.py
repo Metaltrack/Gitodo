@@ -20,6 +20,7 @@ app.add_middleware(
 
 app.include_router(UserAPI.router, prefix="/user-api")
 
+#Called when frontend gets active
 @app.get("/")
 async def init():
     try:
@@ -36,7 +37,7 @@ async def init():
                     break
                 log(log_level.ERROR, __file__, f"Database did not respond...")
             if tries >= 3:
-                log()
+                log(log_level.CRITICAL, __file__, f"Database Connection failed...")
     except Exception as err:
         raise Exception(err)
 

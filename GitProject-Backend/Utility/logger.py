@@ -8,7 +8,7 @@ class log_level:
     CRITICAL :str = "CRITICAL"
 
 def log(level :log_level, file :str, msg :str):
-    timestamp = datetime().isoformat()
+    timestamp = datetime.now().isoformat()
 
     data = {
         "Level": level,

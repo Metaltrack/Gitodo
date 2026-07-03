@@ -1,5 +1,5 @@
 from httpx import request
-
+from Utility.logger import log, log_level
 from Models.repo import Repo
 import requests
 
@@ -27,8 +27,8 @@ class User():
             self.user_repo_url = data["repos_url"]
             self.repo_list :list[Repo] = []
 
-            print(f"LOG> User Created >>\n ID: {self.user_id}\n NAME: {self.user_name}")
+            log(log_level.INFO, __file__, f"User Created >> ID: {self.user_id} | NAME: {self.user_name}")
 
         except Exception as err:
-            print(f"ERR> Error: {err}")
+            log(log_level.ERROR, __file__, f"User Constructor '{err}'")
             return
