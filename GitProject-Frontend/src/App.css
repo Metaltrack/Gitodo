@@ -9,6 +9,49 @@
     --border: #d8c8b0;
     --social-bg: #f3ebdc;
     --shadow: 0 4px 12px rgba(90, 70, 50, 0.12);
+    --progress-bg: linear-gradient( to right, #7e2A7f, #B98DBA );
+}
+
+    :root.dark {
+        --bg: #191613; /* Main background */
+
+        --card-bg: #24201c; /* Cards */
+
+        --text: #d7c6ad; /* Body text */
+
+        --text-h: #f2e5cc; /* Headings */
+
+        --accent: #c69b5d; /* Primary accent */
+
+        --accent-bg: #32281d; /* Buttons */
+
+        --accent-border: #7d5b34; /* Borders */
+
+        --border: #4a3d31; /* Card border */
+        --progress-bg: linear-gradient( to right, #B98DBA, #7e2A7f );
+        --social-bg: #2b241d;
+        --shadow: 0 8px 18px rgba(0,0,0,.45);
+        --success: #7fa96b;
+        --warning: #d4a35f;
+        --danger: #b86b61;
+    }
+
+:root.dev {
+    --bg: #08110a;
+    --card-bg: #101b12;
+    --text: #89ff8b;
+    --text-h: #d9ffd9;
+    --accent: #42ff73;
+    --accent-bg: #14331b;
+    --accent-border: #2faa4e;
+    --border: #24532d;
+    --social-bg: #102514;
+    --shadow: 0 0 18px rgba(66,255,115,.15);
+    --success: #7dff7d;
+    --warning: #ffe36b;
+    --danger: #ff7b7b;
+    --text-shadow: 0 0 3px rgba(66,255,115,.2);
+    --shadow: 0 0 15px rgba(66,255,115,.12);
 }
 
 * {
@@ -21,6 +64,7 @@ body {
     color: var(--text);
     font-family: Georgia, "Times New Roman", serif;
     min-height: 100vh;
+    text-shadow: var(--text-shadow);
 }
 
 #root {

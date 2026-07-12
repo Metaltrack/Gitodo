@@ -11,7 +11,7 @@ function App() {
     const [loginChecker, setLoginChecker] = useState("");
     const navigate = useNavigate();
 
-    const API_URL = 'http://localhost:4067'
+    const API_URL = 'http://192.168.1.70:4067'
 
 //Send backend Code from Github to get Auth Code for data
     function handleLogin(code) {

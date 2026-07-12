@@ -29,7 +29,6 @@ async def init():
         if await db.client.address:
             log(log_level.INFO, __file__, f"Database Response {await db.client.address}")
         else:
-            log
             for tries in range(3):
                 db = DataBase()
                 if await db.client.address:

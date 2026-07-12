@@ -1,16 +1,19 @@
 
 export class Repo {
-    constructor(name, html_url, progress, tasks_list) {
+    constructor(id, name, html_url, progress, tasks, completed, archived, created_at) {
+        this.id = id,
         this.name = name;
         this.html_url = html_url;
         this.progress = progress;
-        this.tasks_list = tasks_list;
+        this.total_tasks = tasks;
+        this.tasks_completed = completed;
+        this.archived = archived;
+        this.created_at = created_at;
     }
 }
 export class UserClass {
-    constructor(name, html_url, repo_list) {
+    constructor(name, html_url) {
         this.name = name;
         this.html_url = html_url;
-        this.repo_list = repo_list;
     }
 }

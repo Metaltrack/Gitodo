@@ -1,3 +1,5 @@
+from multiprocessing import Value
+
 from Utility.logger import log, log_level
 from pymongo import AsyncMongoClient
 from Models.models import user_model, repo_model, task_model
@@ -12,12 +14,39 @@ class DataBase:
         self.database = self.client["test_database"]
         self.collection = self.database["GitCollection"]
 
+    async def get_repository(self, user_id :int):
+        try:
+            query_filter = await self.collection.find_one({"user_id": int(user_id)})
+
+            if not query_filter:
+                log(log_level.ERROR, "database.py", f"UserID '{user_id}' does not exist in Database...")
+                return
+
+            repo_arr = query_filter["repo_list"]
+
+            data = [{"id": r["repo_id"],
+                     "name": r["repo_name"],
+                     "html_url": r["repo_html_url"],
+                     "progress": r["repo_progress"],
+                     "total_tasks": r["total_tasks"],
+                     "completed_tasks": r["completed_tasks"],
+                     "archived": r["repo_archived"],
+                     "created_at": r["created_at"]
+                } for r in repo_arr]
+
+            return data
+
+        except Exception as err:
+            log(log_level.ERROR, "database.py", f"get_repos function '{err}'")
+            raise RuntimeError(err)
+            return
+
     async def get_user(self, user_id :int):
         try:
             query_filter = await self.collection.find_one({"user_id": int(user_id)})
-            print("query_filter", query_filter)
+
             if not query_filter:
-                print("ERR> User not found!!")
+                log(log_level.ERROR, "database.py", f"UserID '{user_id}' does not exist in Database...")
                 return
 
             data = {
@@ -28,7 +57,7 @@ class DataBase:
             return data
 
         except Exception as err:
-            print(f"ERR> Error getting user from database {err}")
+            log(log_level.ERROR, "database.py", f"get_user function '{err}'")
             return
 
 
@@ -36,9 +65,9 @@ class DataBase:
         try:
             query_filter = {"user_id": user.user_id}
             result = await self.collection.find_one(query_filter)
-        
+
             if(result):
-                log(log_level.INFO, __file__, f"User '{user.user_id}' already exists.. Updating user access token..")
+                log(log_level.INFO, "database.py", f"User '{user.user_id}' already exists.. Updating user access token..")
                 update = await self.collection.update_one(query_filter, {"$set":{"access_token":user.access_token}})
                 return
 
@@ -60,18 +89,24 @@ class DataBase:
                         task_id=t.task_id,
                         task_name=t.task_name,
                         task_condition=t.task_condition,
-                        task_completion=t.task_completion
-                    ) for t in r.task_list]
+                        task_completion=t.task_completion,
+                        dead_line=t.dead_line
+                    ) for t in r.task_list],
+                    source_list=[],
+                    total_tasks=r.total_tasks,
+                    completed_tasks=r.completed_tasks,
+                    repo_archived=r.repo_archived,
+                    created_at=r.created_at
                 ) for r in user.repo_list]
             )
 
             result = await self.collection.insert_one(input_user.model_dump())
-            log(log_level.INFO, __file__, f"Database performed query with result '{result.acknowledged}', added user '{result.inserted_id}'")
+            log(log_level.INFO, "database.py", f"Database performed query with result '{result.acknowledged}', added user '{result.inserted_id}'")
 
             index = await self.collection.create_index("user_id")
-            log(log_level.INFO, __file__, f"Database performed query.. index created for user '{user.user_id}' -> '{index}'")
+            log(log_level.INFO, "database.py", f"Database performed query.. index created for user '{user.user_id}' -> '{index}'")
         except Exception as err:
-            log(log_level.ERROR, __file__, f"Database failed to add user, add_user_data function '{err}'")
+            log(log_level.ERROR, "database.py", f"Database failed to add user, add_user_data function '{err}'")
 
     async def delete_user(self, user :User):
         try:
@@ -80,3 +115,29 @@ class DataBase:
             print(result)
         except Exception as err:
             print(f"ERR>> Error removing user: {err}")
+
+    async def update_repo(self, user_id :int, repo_id, data :dict):
+        try:
+            log(log_level.INFO, "database.py", f"Updating database userid '{user_id}'")
+
+            query_filter = {"user_id": int(user_id)}
+            result = await self.collection.find_one(query_filter)
+
+            if not result:
+                log(log_level.ERROR, "database.py", f"User '{user_id}' does not exists...")
+            
+            query_filter = {"user_id": int(user_id), "repo_list.repo_id": int(repo_id)}
+
+            update_operation = {
+                "$set": {
+                    f"repo_list.$.{key}": value
+                    for key, value in data.items()                 
+                }   
+            }
+
+            result = await self.collection.update_one(query_filter, update_operation)
+            log(log_level.INFO, "database.py", f"Database response '{result}'")
+            log(log_level.INFO, "database.py", f"Repo '{repo_id}' of User '{user_id}' was updated with '{data}'")
+        except Exception as err:
+            log(log_level.CRITICAL, "database.py", f"update_repo function '{err}'")
+            raise RuntimeError(err)

@@ -5,6 +5,7 @@ class task_model(BaseModel):
     task_name :str
     task_condition :str
     task_completion :bool
+    dead_line :str
 
 class repo_model(BaseModel):
     repo_id :int
@@ -14,6 +15,11 @@ class repo_model(BaseModel):
     repo_commit_url :str
     repo_progress :int
     task_list :list[task_model]
+    source_list :list[str]
+    total_tasks :int
+    completed_tasks :int
+    repo_archived :bool
+    created_at :str
 
 class user_model(BaseModel):
     user_id :int

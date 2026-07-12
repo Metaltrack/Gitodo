@@ -4,11 +4,12 @@ class Task():
     task_condition :str
     task_completion :bool
 
-    def __init__(self, _id :int, name :str, condition :str):
+    def __init__(self, _id :int, name :str, condition :str, dead_line :str):
         self.task_id = _id
         self.task_name = name
         self.task_condition = condition
         self.task_completion :bool
+        self.dead_line :str = dead_line
 
     def set_completion(self, state :bool):
         self.task_completion = state
