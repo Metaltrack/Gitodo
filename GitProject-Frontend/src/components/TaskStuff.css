@@ -1,0 +1,42 @@
+.task-action-bar {
+    width: 100%;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: max-height .35s ease;
+}
+
+.task-action-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 18px 24px;
+}
+
+.add-task {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    font-size: 30px;
+}
+
+.expand-arrow {
+    transition: .25s;
+}
+
+.expanded .expand-arrow {
+    transform: rotate(180deg);
+}
+
+.task-action-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .35s ease;
+}
+
+.task-action-bar.expanded
+.task-action-body {
+    max-height: 250px;
+}

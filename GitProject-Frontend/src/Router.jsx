@@ -9,7 +9,7 @@ function Router() {
             <Routes>
                 <Route path="/" element={<App />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/repoviewer?id" element={<RepoViewer />} />
+                <Route path="/repoviewer" element={<RepoViewer />} />
             </Routes>
         </BrowserRouter>
     );

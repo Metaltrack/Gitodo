@@ -32,7 +32,7 @@
     border-radius: 0;
     background: var(--accent-bg);
     color: var(--accent);
-    writing-mode: vertical-rl;
+    /*writing-mode: vertical-rl;*/
     text-orientation: mixed;
     display: flex;
     justify-content: center;

@@ -1,4 +1,3 @@
-from ast import Await
 from datetime import datetime, timedelta
 from pathlib import Path
 import secrets
@@ -6,6 +5,7 @@ from urllib import response
 from fastapi import FastAPI, APIRouter, HTTPException
 import os
 from dotenv import load_dotenv
+from Models import repo
 from Models.user import User
 from .database import DataBase
 from Services import database
@@ -33,7 +33,7 @@ def get_cred(cred = Depends(security)):
 #---------Functions----------#
 async def update_repos(repo_id :int, data :dict, user_id :int):
     try:
-        log(log_level.INFO, "UserAPI.py", f"UserID from frontend: '{user_id}'")
+        log(log_level.INFO, "UserAPI.py", f"UserID from frontend: '{user_id}' to update repos")
         await db.update_repo(user_id, repo_id, data)
         return {"message": "Repo Updated"}
     except Exception as err:
@@ -42,13 +42,28 @@ async def update_repos(repo_id :int, data :dict, user_id :int):
 
 async def get_user_data(user_id :int):
     try:
-        log(log_level.INFO, "UserAPI.py", f"UserID from frontend: '{user_id}'")
+        log(log_level.INFO, "UserAPI.py", f"UserID from frontend: '{user_id}' to get user data")
         return await db.get_user(user_id)
 
     except Exception as err:
         log(log_level.ERROR, "UserAPI.py", f"get_user_data function '{err}'")
         return HTTPException(status_code=404, detail="User not found...")
 
+async def get_repo_data(user_id :int, repo_id :int):
+    try:
+        log(log_level.INFO, "UserAPI.py", f"UserID from frontend: '{user_id}' to get repo '{repo_id}'")
+        return await db.repo_data(user_id, repo_id)
+    except Exception as err:
+        log(log_level.ERROR, "UserAPI.py", f"get_repo_data funtion '{err}'")
+        raise RuntimeError(err)
+
+async def get_repo_tasks(user_id :int, repo_id :int):
+    try:
+        log(log_level.INFO, "UserAPI.py", f"UserID from frontend: '{user_id}' to get repo tasks of '{repo_id}'")
+        return await db.task_data(user_id, repo_id)
+    except Exception as err:
+        log(log_level.ERROR, "UserAPI.py", f"task_data funtion '{err}'")
+        raise RuntimeError(err)
 
 #called for login
 #code -> Recieved from After Github login page auth
@@ -136,3 +151,17 @@ async def user_update_repo(repo_id :int, data :dict, user_id :str = Depends(get_
     log(log_level.INFO, "UserAPI.py", f"Request to update repo '{repo_id}' of User '{user_id}'")
     return await update_repos(repo_id, data, user_id)
 
+
+#--Routes for repos --#
+#Called when viewing a repo
+@router.get("/repo/{repo_id}")
+async def get_repo(repo_id: int, user_id :str = Depends(get_cred)):
+    log(log_level.INFO, "UserAPI.py", f"Request to get repo '{repo_id}' of User '{user_id}'")
+    return await get_repo_data(user_id, repo_id)
+
+
+#--Routes for tasks --#
+@router.get("/repo/tasks/{repo_id}")
+async def get_tasks(repo_id :int, user_id :str = Depends(get_cred)):
+    log(log_level.INFO, "UserAPI.py", f"Request to get task data of repo '{repo_id}' of User '{user_id}'")
+    return await get_repo_tasks(user_id, repo_id)

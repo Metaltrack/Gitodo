@@ -2,16 +2,21 @@
 import './RepoCard.css'
 import Router from '../Router';
 import { log_level, log } from '../scripts/logger.jsx'
+import { createSearchParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react';
 
 function RepoCard({ repo, onUpdateRepo }) {
     const API_URL = 'http://192.168.1.70:4067';
     const token = localStorage.getItem("token");
+    const navigate = useNavigate();
+    const [icon, setIcon] = useState('>]');
 
     return (
         <div
             className="repo-card"
             onClick={() => {
-                window.location.href = `/repoviewer?id=${repo.id}`;
+                // window.location.href = `/repoviewer?id=${repo.id}`;
+                navigate(`/repoviewer?${createSearchParams({id: repo.id}).toString()}`);
             }}
         >
 
@@ -57,10 +62,12 @@ function RepoCard({ repo, onUpdateRepo }) {
 
                     e.stopPropagation();
 
+                    const repo_state = !repo.archived;
+
                     log(log_level.INFO, "RepoCard.jsx", `Archiving repo '${repo.id}'`)
                     fetch(`${API_URL}/user-api/user-update-repo/${repo.id}`, {
                         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, method: "POST", body: JSON.stringify({
-                            repo_archived: true
+                            repo_archived: repo_state
                         })
                     }).then(
                         (response) => {
@@ -70,7 +77,7 @@ function RepoCard({ repo, onUpdateRepo }) {
                             }
 
                             onUpdateRepo(repo.id, {
-                                archived: true
+                                archived: repo_state
                             });
                         }
                     ).catch(
@@ -80,8 +87,8 @@ function RepoCard({ repo, onUpdateRepo }) {
                     )
                 }}
                 title="Archive"
-            >
-                    {'>'}]
+                >
+                    {icon}
             </button>
 
             </div>

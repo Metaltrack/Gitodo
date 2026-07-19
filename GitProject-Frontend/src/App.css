@@ -344,3 +344,18 @@ pre {
                 justify-content: center;
             }
 }
+
+.progress-bar-repo {
+    height: 14px;
+    background: #e8dcc8;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    width: 800px;
+}
+
+.progress-repo {
+    height: 100%;
+    background: var(--progress-bg);
+    transition: width .35s ease;
+}

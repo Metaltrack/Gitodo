@@ -1,3 +1,12 @@
+export class Task {
+    constructor(id, name, condition, completion, deadline) {
+        this.id = id;
+        this.name = name;
+        this.condition = condition;
+        this.completion = completion;
+        this.deadline = deadline;
+    }
+}
 
 export class Repo {
     constructor(id, name, html_url, progress, tasks, completed, archived, created_at) {

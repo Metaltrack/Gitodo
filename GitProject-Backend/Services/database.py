@@ -14,6 +14,7 @@ class DataBase:
         self.database = self.client["test_database"]
         self.collection = self.database["GitCollection"]
 
+#--User Queries--#
     async def get_repository(self, user_id :int):
         try:
             query_filter = await self.collection.find_one({"user_id": int(user_id)})
@@ -116,6 +117,8 @@ class DataBase:
         except Exception as err:
             print(f"ERR>> Error removing user: {err}")
 
+
+#--Repo Queries--#
     async def update_repo(self, user_id :int, repo_id, data :dict):
         try:
             log(log_level.INFO, "database.py", f"Updating database userid '{user_id}'")
@@ -124,7 +127,8 @@ class DataBase:
             result = await self.collection.find_one(query_filter)
 
             if not result:
-                log(log_level.ERROR, "database.py", f"User '{user_id}' does not exists...")
+                log(log_level.ERROR, "database.py", f"User '{user_id}' does not exist...")
+                return None
             
             query_filter = {"user_id": int(user_id), "repo_list.repo_id": int(repo_id)}
 
@@ -140,4 +144,63 @@ class DataBase:
             log(log_level.INFO, "database.py", f"Repo '{repo_id}' of User '{user_id}' was updated with '{data}'")
         except Exception as err:
             log(log_level.CRITICAL, "database.py", f"update_repo function '{err}'")
+            raise RuntimeError(err)
+
+    async def repo_data(self, user_id :int, repo_id :int):
+        try:
+            log(log_level.INFO, "database.py", f"Getting repo data from RepoID '{repo_id}' of User '{user_id}'")
+
+            query_filter = {"user_id": int(user_id)}
+            result = await self.collection.find_one(query_filter)
+
+            if not result:
+                log(log_level.ERROR, "database.py", f"User '{user_id}' does not exist...")
+                return None
+
+            query_filter = {"user_id": int(user_id), "repo_list.repo_id": int(repo_id)}
+
+            repo_data = await self.collection.find_one(query_filter)
+
+            repo = next(r for r in repo_data["repo_list"] if r["repo_id"] == int(repo_id))
+
+            data = {
+                "id": repo["repo_id"],
+                "name": repo["repo_name"],
+                "html_url": repo["repo_html_url"],
+                "progress": repo["repo_progress"],
+                "total_tasks": repo["total_tasks"],
+                "completed_task": repo["completed_tasks"],
+                "archived": repo["repo_archived"],
+                "created_at": repo["created_at"],
+            }
+
+            return data
+        except Exception as err:
+            log(log_level.ERROR, "database.py", f"repo_data function '{err}'")
+            raise RuntimeError(err)
+
+
+#--Task Queries--#
+
+    async def task_data(self, user_id :int, repo_id :int):
+        try:
+            log(log_level.INFO, "database.py", f"Getting repo data from RepoID '{repo_id}' of User '{user_id}'")
+
+            query_filter = {"user_id": int(user_id)}
+            result = await self.collection.find_one(query_filter)
+
+            if not result:
+                log(log_level.ERROR, "database.py", f"User '{user_id}' does not exist...")
+                return None
+            
+            query_filter = {"user_id": int(user_id), "repo_list.repo_id": int(repo_id)}
+            user = await self.collection.find_one(query_filter)
+
+            repo = next(r for r in user["repo_list"] if r["repo_id"] == repo_id)
+
+            tasks = repo["task_list"]
+
+            return tasks
+        except Exception as err:
+            log(log_level.ERROR, "database.py", f"task_data function '{err}'")
             raise RuntimeError(err)
