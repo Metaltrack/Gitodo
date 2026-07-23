@@ -1,5 +1,6 @@
 from multiprocessing import Value
 
+from Models import repo
 from Utility.logger import log, log_level
 from pymongo import AsyncMongoClient
 from Models.models import user_model, repo_model, task_model
@@ -199,8 +200,50 @@ class DataBase:
             repo = next(r for r in user["repo_list"] if r["repo_id"] == repo_id)
 
             tasks = repo["task_list"]
+            print(tasks)
 
             return tasks
         except Exception as err:
             log(log_level.ERROR, "database.py", f"task_data function '{err}'")
+            raise RuntimeError(err)
+
+    async def add_task_data(self, user_id :int, repo_id :int, data :dict):
+        try:
+            log(log_level.INFO, "database.py", f"Adding new task for repo '{repo_id}' of user '{user_id}'")
+
+            query_filter = {"user_id": int(user_id)}
+            result = await self.collection.find_one(query_filter)
+
+            if not result:
+                log(log_level.ERROR, "database.py", f"User '{user_id}' does not exis...")
+                return None
+
+            query_filter = {"user_id": int(user_id), "repo_list.repo_id": int(repo_id)}
+            user = await self.collection.find_one(query_filter)
+
+            repo = next(r for r in user["repo_list"] if r["repo_id"] == repo_id)
+
+            task_id = int((repo["repo_id"] + len(user["repo_list"]) + 1))
+            task = Task(task_id, data["task_name"], data["task_condition"], data["dead_line"])
+
+            await self.collection.update_one(
+                    {"user_id": int(user_id),
+                     "repo_list.repo_id": int(repo_id)
+                     },
+                    {
+                        "$push": {"repo_list.$.task_list": {
+                            "task_id": int(task.task_id),
+                            "task_name": str(task.task_name),
+                            "task_condition": str(task.task_condition),
+                            "task_completion": bool(task.task_completion),
+                            "dead_line": str(task.dead_line)
+                        }},
+                        "$inc": {"repo_list.$.total_tasks": 1}
+                    }
+                )
+
+            return {"message": f"Task added successfully with ID '{task_id}"}
+
+        except Exception as err:
+            log(log_level.ERROR, "database.py", f"add_task_data funtion '{err}'")
             raise RuntimeError(err)

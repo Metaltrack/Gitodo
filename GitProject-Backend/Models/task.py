@@ -8,14 +8,6 @@ class Task():
         self.task_id = _id
         self.task_name = name
         self.task_condition = condition
-        self.task_completion :bool
+        self.task_completion :bool = False
         self.dead_line :str = dead_line
 
-    def set_completion(self, state :bool):
-        self.task_completion = state
-
-    def set_name(self, name :str):
-        self.task_name = name
-
-    def set_condition(self, condition :str):
-        self.task_condition = condition

@@ -65,6 +65,14 @@ async def get_repo_tasks(user_id :int, repo_id :int):
         log(log_level.ERROR, "UserAPI.py", f"task_data funtion '{err}'")
         raise RuntimeError(err)
 
+async def add_repo_task(user_id :int, repo_id :int, data :dict):
+    try:
+        log(log_level.INFO, "UserAPI.py", f"UserID from frontend: '{user_id}' to add repo tasks of '{repo_id}'")
+        return await db.add_task_data(user_id, repo_id, data)
+    except Exception as err:
+        log(log_level.ERROR, "UserAPI.py", f"task_data funtion '{err}'")
+        raise RuntimeError(err)
+
 #called for login
 #code -> Recieved from After Github login page auth
 async def user_login(code :str):
@@ -165,3 +173,8 @@ async def get_repo(repo_id: int, user_id :str = Depends(get_cred)):
 async def get_tasks(repo_id :int, user_id :str = Depends(get_cred)):
     log(log_level.INFO, "UserAPI.py", f"Request to get task data of repo '{repo_id}' of User '{user_id}'")
     return await get_repo_tasks(user_id, repo_id)
+
+@router.post("/repo/tasks/add-task/{repo_id}")
+async def add_task(repo_id :int, data :dict, user_id :str = Depends(get_cred)):
+    log(log_level.INFO, "UserAPI.py", f"Request to add task in repo '{repo_id}' of User '{user_id}'")
+    return await add_repo_task(user_id, repo_id, data)

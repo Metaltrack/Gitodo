@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import Router from "../Router";
 import { log_level, log } from '../scripts/logger.jsx';
 import '../App.css'
+import './TaskStuff.css'
 import { setTheme, cycleThemes } from '../Util/Theme'
 import { Repo, Task } from '../scripts/DataClass.jsx'
 
@@ -14,6 +15,8 @@ function RepoViewer() {
 
     const [RepoData, setRepoData] = useState(() => Repo);
     const [TaskData, setTaskData] = useState([]);
+    const [CompletedTasksCount, setCompletedTasksCount] = useState(0);
+    const [NextDeadline, setNextDeadline] = useState();
 
     const query = window.location.search;
     const searchParams = new URLSearchParams(query);
@@ -22,7 +25,38 @@ function RepoViewer() {
 
     console.log(id);
 
-    var [taskChecker, setTaskChecker] = useState("");
+    var [taskChecker, setTaskChecker] = useState("No Tasks");
+
+
+    const [ShowAddTask, setShowAddTask] = useState(false);
+    const [newTask, setNewTask] = useState({
+        task_name: "",
+        task_condition: "",
+        dead_line: ""
+    });
+
+    function addTask() {
+        console.log(newTask);
+
+        fetch(`${API_URL}/user-api/repo/tasks/add-task/${id}`, {
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            method: "POST",
+            body: JSON.stringify(newTask)
+        }).then((response) => {
+            if (!response.ok) {
+                log(log_level.ERROR, "RepoViewer.jsx", `Response from API '${response.statusText}'`)
+                return;
+            }
+
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+        }).catch((err) => {
+            log(log_level.ERROR, "RepoViewer.jsx", `Error adding task data '${err}'`);
+        });
+
+        setShowAddTask(false);
+    }
 
     useEffect(() => {
         setTheme(localStorage.getItem("theme") || "light");
@@ -57,21 +91,38 @@ function RepoViewer() {
         }).then((data) => {
             const task_list = [];
             console.log(data);
+
             data.forEach(task => {
                 task_list.push(new Task(
-                    data["task_id"],
-                    data["task_name"],
-                    data["task_condition"],
-                    data["task_completion"],
-                    data["dead_line"]
+                    task.task_id,
+                    task.task_name,
+                    task.task_condition,
+                    task.task_completion,
+                    task.dead_line
                 ))
             });
-
+            console.log(task_list);
             setTaskData(task_list);
+            var completed_count = 0;
+            
+            TaskData.forEach(task => {
+                if (task.task_completion == true) {
+                    completed_count = completed_count + 1;
+                }
+            })
+
+            setCompletedTasksCount(completed_count);
+
+            if (TaskData.length > 0) {
+                setNextDeadline(TaskData[0].dead_line);
+            } else {
+                setNextDeadline("No Tasks");
+            }
 
             if (TaskData.length == 0) {
                 setTaskChecker("~ No Tasks ~");
             }
+            console.log(TaskData);
         });
     }, [])
 
@@ -100,13 +151,101 @@ function RepoViewer() {
                 <br />
                 
                 <br />
+
+                <div className="task-action-row">
+                    <div className="action-section">
+                        <h3>Tasks: {CompletedTasksCount}/{TaskData.length}</h3>
+                    </div>
+                    <div className="action-section">
+                        <button className="active-button" onClick={() => setShowAddTask(true)}>Add Task</button>
+                    </div>
+                    <div className="action-section">
+                        <h3>Next Deadline: {NextDeadline}</h3>
+                    </div>
+                </div>
+
+                <br />
+
                 <h3>
                     {
                         taskChecker
                     }
                 </h3>
-
             </section>
+
+            {
+                ShowAddTask &&
+                <div
+                    className="modal-overlay"
+                    onClick={() => setShowAddTask(false)}
+                >
+                    <div
+                        className="task-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+
+                        <h2>Add Task</h2>
+
+                        <div className="task-input-group">
+
+                            <label>Task Name</label>
+                            <input
+                                type="text"
+                                value={newTask.task_name}
+                                onChange={(e) =>
+                                    setNewTask({
+                                        ...newTask,
+                                        task_name: e.target.value
+                                    })
+                                }
+                            />
+
+                            <label>Completion Condition</label>
+                            <textarea
+                                rows="4"
+                                value={newTask.task_condition}
+                                onChange={(e) =>
+                                    setNewTask({
+                                        ...newTask,
+                                        task_condition: e.target.value
+                                    })
+                                }
+                            />
+
+                            <label>Deadline</label>
+                            <input
+                                type="date"
+                                value={newTask.dead_line}
+                                onChange={(e) =>
+                                    setNewTask({
+                                        ...newTask,
+                                        dead_line: e.target.value
+                                    })
+                                }
+                            />
+
+                        </div>
+
+                        <div className="modal-buttons">
+
+                                <button
+                                    onClick={addTask}
+                            >
+                                Add
+                            </button>
+
+                            <button
+                                className="cancel-btn"
+                                onClick={() => setShowAddTask(false)}
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+            }
         </>
     )
 }

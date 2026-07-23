@@ -1,42 +1,130 @@
 .task-action-bar {
-    width: 100%;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: var(--shadow);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    padding-right: 60px;
+    max-width: 720px;
+}
+
+.task-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background: var(--card-bg);
     border: 2px solid var(--border);
     border-radius: 18px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    transition: max-height .35s ease;
+    padding: 8px 200px;
+    margin-bottom: 24px;
 }
 
-.task-action-header {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+.action-section {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+}
+
+    .action-section.center {
+        justify-content: center;
+    }
+
+    .action-section.right {
+        justify-content: flex-end;
+    }
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex;
+    justify-content: center;
     align-items: center;
-    padding: 18px 24px;
+    z-index: 1000;
+    animation: fadeIn .2s ease;
 }
 
-.add-task {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    font-size: 30px;
+.task-modal {
+    width: 500px;
+    max-width: 90vw;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    animation: popup .25s ease;
 }
 
-.expand-arrow {
-    transition: .25s;
+    .task-modal h2 {
+        margin: 0;
+        text-align: center;
+    }
+
+.task-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.expanded .expand-arrow {
-    transform: rotate(180deg);
+    .task-input-group input,
+    .task-input-group textarea {
+        width: 100%;
+        background: var(--bg);
+        color: var(--text);
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        font-family: inherit;
+        font-size: 15px;
+    }
+
+        .task-input-group input:focus,
+        .task-input-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
 }
 
-.task-action-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height .35s ease;
+.cancel-btn {
+    background: #ead9d5;
+    color: #7b433e;
 }
 
-.task-action-bar.expanded
-.task-action-body {
-    max-height: 250px;
+@keyframes popup {
+
+    from {
+        transform: translateY(20px) scale(.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
